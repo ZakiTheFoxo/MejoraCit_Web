@@ -44,8 +44,8 @@
         'exp'  		=> $expire_at,                      
         'key' 		=> $key                
     ];
-    // $url	=	'https://lumacad.com.mx/mejoracit/mejoracit_web/api/service/register/';
-    $url	=	'http://localhost/mejoracit_web/api/service/register/';
+    $url	=	'https://lumacad.com.mx/mejoracit/mejoracit_web/api/service/register/';
+    // $url	=	'http://localhost/mejoracit_web/api/service/register/';
     $post	=	$data;
     $metodo	=	"POST";
     $response = json_decode(curl($url,$post,$metodo));
