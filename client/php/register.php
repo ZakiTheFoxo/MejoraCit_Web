@@ -11,23 +11,26 @@
     session_start();
     header('Content-Type: application/json; charset=utf-8');
 
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+
     /********** Validaciones *************/
     if ($_SERVER['REQUEST_METHOD'] != 'POST') { echo '{"status":405,"description":"Method not allowed"}'; exit(); }
-    if(!isset($_POST['username'])){ echo '{"status":501,"description":"Data missing - username"}'; exit(); }
-    if(!isset($_POST['correo'])){ echo '{"status":501,"description":"Data missing - correo"}'; exit(); }
-    if(!isset($_POST['password'])){ echo '{"status":501,"description":"Data missing - password"}'; exit(); }
+    if(!isset($data['username'])){ echo '{"status":501,"description":"Data missing - username"}'; exit(); }
+    if(!isset($data['correo'])){ echo '{"status":501,"description":"Data missing - correo"}'; exit(); }
+    if(!isset($data['password'])){ echo '{"status":501,"description":"Data missing - password"}'; exit(); }
 
-    if(isset($_POST['celular'])){
-        if(!is_numeric($_POST['celular'])) { echo '{"status":501,"description":"Invalid phone - Not numeric"}'; exit(); }
-        if(strlen($_POST['celular']) != 10) { echo '{"status":501,"description":"Invalid phone - Must be 10"}'; exit(); }
+    if(isset($data['celular'])){
+        if(!is_numeric($data['celular'])) { echo '{"status":501,"description":"Invalid phone - Not numeric"}'; exit(); }
+        if(strlen($data['celular']) != 10) { echo '{"status":501,"description":"Invalid phone - Must be 10"}'; exit(); }
     } else { 
-        $_POST['celular'] = ""; 
+        $data['celular'] = ""; 
     }
 
-    if(!filter_var($_POST['correo'], FILTER_VALIDATE_EMAIL)) { echo '{"status":501,"description":"Invalid email"}'; exit(); }
+    if(!filter_var($data['correo'], FILTER_VALIDATE_EMAIL)) { echo '{"status":501,"description":"Invalid email"}'; exit(); }
 
     /********** Encriptacion *****************/
-    $_POST['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
     /***************** JWT **************/
     $date   		= new DateTimeImmutable();
@@ -41,9 +44,9 @@
         'exp'  		=> $expire_at,                      
         'key' 		=> $key                
     ];
-    $url	=	'https://lumacad.com.mx/mejoracit/mejoracit_web/api/service/register/';
-    // $url	=	'http://localhost/mejoracit_web/api/service/register/';
-    $post	=	$_POST;
+    // $url	=	'https://lumacad.com.mx/mejoracit/mejoracit_web/api/service/register/';
+    $url	=	'http://localhost/mejoracit_web/api/service/register/';
+    $post	=	$data;
     $metodo	=	"POST";
     $response = json_decode(curl($url,$post,$metodo));
     echo json_encode($response);
