@@ -1,7 +1,8 @@
 <?php
-include '../../api/helper/helper.php';
+include 'conexion.php';
+
 $json = file_get_contents('php://input');
-$data = json_decode($json, true);
+$data = json_decode($_POST['data'], true);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -10,12 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         && isset($data['estatus'])
         && isset($data['fecha_inicial'])
         && isset($data['descripcion'])
-        && isset($data['imagen'])
         && isset($data['latitud'])
         && isset($data['longitud'])
         && isset($data['colonia'])
         && isset($data['calle'])
         && isset($data['id_usuario'])
+        && isset($_FILES["photo"]) 
+        && $_FILES["photo"]["error"] == UPLOAD_ERR_OK
     ) {
 
         $latitud = $mysqli->real_escape_string($data['latitud']);
@@ -29,6 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $result_localizacion = $mysqli->query($query_localizacion);
 
         if ($result_localizacion) {
+            $imagen = $_FILES['photo'];
+            $carpetaImagen = "../img/";
+            $nombreImagen = md5(uniqid(rand(), true)) . ".jpg";
+            move_uploaded_file($imagen['tmp_name'], $carpetaImagen . $nombreImagen);
 
             $id_locacion = $mysqli->insert_id;
 
@@ -37,11 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $estatus = $mysqli->real_escape_string($data['estatus']);
             $fecha_inicial = $mysqli->real_escape_string($data['fecha_inicial']);
             $descripcion = $mysqli->real_escape_string($data['descripcion']);
-            $imagen = $mysqli->real_escape_string($data['imagen']);
             $id_usuario = $mysqli->real_escape_string($data['id_usuario']);
 
             $query_reporte = "INSERT INTO reporte (folio, categoria, estatus, fecha_inicial, descripcion, imagen, id_locacion, id_usuario) 
-                                VALUES ('$folio', '$categoria', '$estatus', '$fecha_inicial', '$descripcion', '$imagen', '$id_locacion', '$id_usuario')";
+                                VALUES ('$folio', '$categoria', '$estatus', '$fecha_inicial', '$descripcion', '$nombreImagen', '$id_locacion', '$id_usuario')";
 
             $result_reporte = $mysqli->query($query_reporte);
 
